@@ -1,8 +1,7 @@
 {
   "index": "Introduction",
-  "another": "Blackbeard Prompt",
-  "advanced": "Blackbeard Rael",
-  "advanced": "Blackbeard Rael",
+  "blackbeard_rael": "Blackbeard RAEL",
+  "blackbeard_prompts": "Blackbeard Prompts",
   "about": {
     "title": "About",
     "type": "page"
