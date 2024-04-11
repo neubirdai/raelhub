@@ -1,3 +1,38 @@
-# Advanced
+# RAEL for AWS IT telemetry
 
-This is the index page for the Advanced folder!
+```YAML
+# Simple sequential chain that uses openai
+- FilterChain: BaseSQLChain
+  Filters:
+    - name: LLMGenerateFollowUp
+    - name: CombinePromptHistory
+    - name: GenDBSelectTables
+    - name: RagFilter
+      select:
+        - {event: rag_content, filter: GenDBGenerateRAGAnswer}
+    - name: GenDBGenerateSchema
+    - name: GenDBGenerateQuery
+      select:
+        - {event: no_sql, filter: Conclusion}
+    - name: SQLCleanse
+    - name: SQLCorrection
+    - name: GenDBExecute
+      requires: [query]
+      select:
+           - {event: bad_sql, filter: SQLFix, retries: 4}
+           - {event: any, filter: GenDBGenerateAnswer}
+    - name: SQLFix
+      requires: [exception]
+      select:
+        - {event: any, filter: GenDBExecute}
+    - name: GenDBGenerateAnswer
+      select:
+           - {event: any, filter: Conclusion}
+    - name: GenDBGenerateRAGAnswer
+    - name: Conclusion
+    - name: AddResultsHistory
+    - name: LLMClassifyVisualization
+      requires: [raw_question]
+    - name: LLMAnnotateVisualization
+      requires: [raw_question, question, visualization]
+```

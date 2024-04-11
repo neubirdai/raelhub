@@ -1,31 +1,251 @@
-# Another Page
+# Prompt for AWS IT telemetry
 
-```js filename="demo.js" {3} copy
-let a = 1;
+```python
+# A set of instruction templates.  Consider loading these as a yaml
 
-console.log(a);
+TABLE_TRAIN_INSTRUCTION = """
+The data below is a SQL table metadata and it's contents.
+It is followed by an optional comment section that describes what is in the table.
+Summarize what that table is about according to the following rules:
+1. Only use keywords in the summaries.
+2. Pay attention to the comments that describe the table.
+3. In the summary, include information on each column of the table.  DO NOT ALTER COLUMN NAME IN SUMMARY.
+4. Do not alter the table and column names from the table metadata.
+5. Do not use prepositions like "the", "contains", "in", "for" etc in any summarizations.
+6. Follow the format below for the summary:
+Table Summary: Table summary
+Column Summary: COLUMN_NAME_1: summary of column 1\n COLUMN_NAME_2: summary of column 2\n
+
+Table Schema and Sample Rows:
+{table}
+
+TABLE COMMENTS:
+{comment}
+
+SUMMARY:"""
+
+# TODO Consider asking the LLM to use LIKE %prompt_data% when necessary or ambiguous
+SQL_QUERY_INSTRUCTION = """
+Given an input question, create a syntactically correct SQL query to run for a Postgres database. Follow the following rules:
+
+1. The database schema is provided below.  Only use this schema to create the query.
+2. The table may contain JSONB data.  Create queries that can extract data from the JSONB when applicable.
+3. Use table aliases to avoid ambiguity in the column names.
+4. Limit the result to 10 rows.
+5. Refer to the conversation history listed below to see previous questions and results.  Incorporate this into the SQL query if applicable.
+6. Only provide just the SQL query without markdown and comments.  Just a query string that can be pasted to psql.
+7. If a SQL query cannot be generated, simply reply with an empty string.
+
+/* BEGIN SCHEMA */
+Schema and Table Summary:
+{schema}
+/* END SCHEMA */
+
+/* BEGIN HISTORY */
+History:
+{history}
+/* END HISTORY */
+
+Question:
+{question}
+
+SQL Query:"""
+
+SQL_QUERY_EXCEPTION_INSTRUCTION = """
+I asked you to generate a SQL statement and I got the following exceptions below while executing the SQL query you generated.  Do the following:
+1. Refer to the database schema provided again below.
+2. Look at the SQL query you had generated.
+3. Then look at the SQL exceptions shown below.
+4. Regenerate the correct SQL Query and only provide exactly the SQL statement in the output without any markdown.
+5. If a correct SQL query cannot be generated, simply reply with an empty string.
+
+-- BEGIN SCHEMA --
+{schema}
+-- END SCHEMA --
+
+Bad SQL Query:
+{query}
+
+/* BEGIN EXCEPTIONS */
+SQL Exceptions:
+{exception}
+/* END EXCEPTIONS */
+
+Corrected SQL Query:"""
+
+SQL_RESPONSE_INSTRUCTION = """
+Below is a SQL database schema followed by a human question and a SQL representation of that question and the SQL response.
+Create a natural language interpretation of the results tabulating any data needed for the summary.
+Do not summarize the question or the query itself.
+
+Schema:
+{schema}
+
+Human Question:
+{question}
+
+Extra Context:
+{context}
+
+SQL Query:
+{query}
+
+SQL Response:
+{response}
+
+Natural Language Summary"""
+
+RAG_RESPONSE_INSTRUCTION = """You are an assistant for question-answering tasks. Use the following pieces of retrieved
+context to answer the question. If you don't know the answer, just say that you don't know. Use three sentences
+maximum and keep the answer concise.
+
+Question: {question}
+
+Context: {context}"""
+
+PROMPT_KEYWORD_INSTRUCTION = """
+Given an input question, extract important concepts, nouns, verbs, adjectives.
+In the output only include the extracted concepts and keywords and not any of the input data or explanation.
+Make the key concepts comma seperated and do not use any other special characters.
+
+Question: {question}
+
+Keywords:"""
+
+DEFAULT_PROMPT_EXPANSION_INSTRUCTION = """
+The question below is about an IT technology scenario and is likely from someone having a question about devops, ITOps, infrastructure and application technologies.
+I want you to extract important concepts, nouns, verbs, adjectives.
+Add special tags and keywords using camelcase and tech shorthand when needed.
+In the output only include the extracted concepts and keywords and not any of the input data or explanation.
+Make the key concepts comma seperated and do not use any other special characters.
+Add a few alternative phrases of the input keywords that are commonly used in IT jargon and could be found in log files and telemetry.
+
+Question: {question}
+
+Concepts:"""
+
+COMBINE_PROMPT_HISTORY_INSTRUCTION = """
+Below is a human question seeking information from a database.
+It is followed by a conversation history with you.
+Rewrite the current question such that it follows the following rules:
+1. Unless the current question is a complete new question, combine the thought in the current question with something relevant from the conversation history.
+2. Only pick questions from the history that MAY make sense to the current question.
+3. Do not add context that does not exist in the History.
+4. Output the combined question at the end.
+
+Current Question:
+{question}
+
+Conversation History (most recent last):
+{history}
+
+Combined Question:"""
+
+
+GET_BEST_TABLES_FOR_PROMPT_INSTRUCTION = """
+Below is a human prompt seeking information from a database.
+It is followed by a dictionary of database table names and a summary of the table contents.
+Identify a combination of tables that are most likely to contain the answer to the user's prompt.
+
+Follow these rules:
+1. Only list table names from the table descriptions list below.
+2. In the Best Tables output include a mixture of table types that are best candidates for answering the human prompt.
+3. Only include up to SIX comma seperated table names and nothing else.
+4. Do not include any other text in the output.
+5. Do not include any of the tables that are not relevant to the prompt.
+6. Do not explain why the tables are relevant to the prompt.
+7. Your answer should be in the format "table_1, table_2, table_3, table_4, table_5, table_6"
+
+Human Prompt: {question}
+
+Table Descriptions:
+{metadata}
+
+Best Tables:"""
+
+'''
+GET_BEST_TABLES_FOR_PROMPT_INSTRUCTION = """
+Given the list of tables below, what SIX tables are best capable of answering the question listed in Human Prompt below?
+
+Human Prompt: {question}
+
+Table Descriptions:
+{metadata}
+
+Best Tables:"""
+'''
+
+GET_FOLLOW_UP_FOR_PROMPT_INSTRUCTION = """
+Below is a human prompt seeking the best suggested follow-up question to ask after the original question.
+
+Follow these rules:
+1. Only return a single question in the form of a sentence.
+2. The follow-up question should be related to the original question asked.
+3. Do not include any other text in the output.
+4. Return the follow-up question in the format of a new prompt to ask an LLM
+5. The persona who will ask the follow-up question is myself, the user, or a colleague.
+6. The question should be in first person and should be a continuation of the original question.
+
+Original Question: {question}
+
+Follow-up question:"""
+
+CLASSIFY_VISUALIZATION_TYPE_INSTRUCTION = """
+Below is a human prompt seeking the best visualization type to use for the data  in the answer.
+
+These possible visualization types to choose from:
+- graph_line
+- graph_pie
+- graph_doughnut
+- diagram
+- none
+
+Follow these rules:
+1. Only return a single visualization type from the list above.
+2. Do not include any other text in the output.
+3. If a visualization does not make sense, return none.
+4. The visualization type should be determined by the data in the answer and the question asked.
+
+Data: {data}
+Question: {question}
+
+Visualization Type:"""
+
+ANNOTATE_VISUALIZATION_INSTRUCTION = """
+Below is a human prompt seeking the best graph title, x-axis, and y-axis for a given question.
+
+Follow these rules:
+1. Only return a single graph title, x-axis, and y-axis.
+2. The graph title should be a short, descriptive title that summarizes the data in the answer and the question asked.
+3. The x-axis and y-axis should be short, descriptive labels that summarize the data in the answer and the question asked.
+4. Do not include any other text in the output.
+5. Return the graph_title, x_axis, and y_axis as key-value pairs in the format below.
+6. Do not put the key/value pairs in a JSON object or similar format.
+
+graph_title="Graph Title"
+x_axis="X Axis Label"
+y_axis="Y Axis Label"
+
+Data: {data}
+Question: {question}
+
+Graph title, x-axis, and y-axis:"""
+
+
+CONCLUSION_INSTRUCTION = """
+Below is a human question and context to the conversation.
+
+Based on the question and context, can you try to generate a solution?
+
+If no solution can be concluded, simply say 'nothing further to conclude'.
+
+Human Question:
+{question}
+
+Context:
+{response}
+
+{history}
+
+Possible Solution"""
 ```
-
-## Component
-
-import { useState } from 'react'
-
-{/* Import CSS modules */}
-import styles from '../components/counters.module.css'
-
-export const Counter = () => {
-  const [count, setCount] = useState(0);
-  return (
-    <div>
-      <button onClick={() => setCount(count + 1)} className={styles.counter}>Clicked {count} times</button>
-    </div>
-  );
-};
-
-<Counter/>
-
-## External Component
-
-import Counters from '../components/counters'
-
-<Counters />
