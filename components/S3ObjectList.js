@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import styles from './S3ObjectList.module.css';
 
 const S3ObjectList = () => {
   const [objects, setObjects] = useState([]);
@@ -8,8 +9,6 @@ const S3ObjectList = () => {
     fetch('/api/s3objects')
       .then(res => res.json())
       .then(data => {
-        console.log(`Setting ${JSON.stringify(data, null, 2)}`);
-        console.log("Setting " + data);
         setObjects(data);
         setLoading(false);
       })
@@ -20,21 +19,16 @@ const S3ObjectList = () => {
   }, []);
 
   if (loading) return <p>Loading...</p>;
-  console.log("Here 2" + objects);
-  if (!objects || objects.length === 0) return <p>No objects found.</p>;
 
   return (
-    <div>
-        <ul>
-            {Array.isArray(objects) ? objects.map((object, index) => (
-                <li key={index}>{object.Key}</li>
-            )) : <p>No objects ahh or invalid data format.</p>}
-        </ul>
+    <div className="s3-object-list">
+      <ul>
+        {objects.map((object, index) => (
+          <li key={index}>{object.Key}</li>
+        ))}
+      </ul>
     </div>
-);
-
-
+  );
 };
 
 export default S3ObjectList;
-
