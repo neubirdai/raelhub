@@ -1,7 +1,9 @@
-# Prompt for AWS IT telemetry
+import PythonEditor from '../components/PythonEditor';
 
-```python
-# A set of instruction templates.  Consider loading these as a yaml
+
+<PythonEditor initialContent={
+`
+# Prompt for AWS IT telemetry
 
 TABLE_TRAIN_INSTRUCTION = """
 The data below is a SQL table metadata and it's contents.
@@ -248,4 +250,5 @@ Context:
 {history}
 
 Possible Solution"""
-```
+`
+}/>

@@ -1,7 +1,9 @@
+import YamlEditor from '../components/YamlEditor';
+
+<YamlEditor initialContent={
+`
 # RAEL for AWS IT telemetry
 
-```YAML
-# Simple sequential chain that uses openai
 - FilterChain: BaseSQLChain
   Filters:
     - name: LLMGenerateFollowUp
@@ -35,4 +37,6 @@
       requires: [raw_question]
     - name: LLMAnnotateVisualization
       requires: [raw_question, question, visualization]
-```
+`
+}/>
+

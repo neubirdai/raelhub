@@ -1,7 +1,7 @@
 {
   "index": "Introduction",
-  "blackbeard_rael": "Blackbeard RAEL",
-  "blackbeard_prompts": "Blackbeard Prompts",
+  "create_rael": "Create a RAEL Chain",
+  "create_prompts": "Create a Prompt Template",
   "about": {
     "title": "About",
     "type": "page"

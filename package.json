@@ -13,10 +13,12 @@
   },
   "homepage": "https://github.com/neubirdai",
   "dependencies": {
+    "ace-builds": "^1.32.9",
     "next": "^13.0.6",
     "nextra": "latest",
     "nextra-theme-docs": "latest",
     "react": "^18.2.0",
+    "react-ace": "^11.0.1",
     "react-dom": "^18.2.0"
   },
   "devDependencies": {
