@@ -10,7 +10,7 @@ AWS.config.update({
 export default async function handler(req, res) {
   const s3 = new AWS.S3();
   const params = {
-    Bucket: 'your-bucket-name' // replace with your bucket name
+    Bucket: process.env.AWS_S3_BUCKET_NAME
   };
 
   try {

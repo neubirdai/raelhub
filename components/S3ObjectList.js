@@ -19,16 +19,20 @@ const S3ObjectList = () => {
 
   if (loading) return <p>Loading...</p>;
 
+  if (loading) return <p>Loading...</p>;
+  if (!objects || objects.length === 0) return <p>No objects found.</p>;
+
   return (
     <div>
-      <h2>S3 Bucket Contents</h2>
-      <ul>
-        {objects.map((object, index) => (
-          <li key={index}>{object.Key}</li>
-        ))}
-      </ul>
+        <ul>
+            {Array.isArray(objects) ? objects.map((object, index) => (
+                <li key={index}>{object.Key}</li>
+            )) : <p>No objects or invalid data format.</p>}
+        </ul>
     </div>
-  );
+);
+
+
 };
 
 export default S3ObjectList;
