@@ -31,6 +31,7 @@ export default async function handler(req, res) {
 
     try {
       await s3.upload(params).promise();
+      console.log("uploaded doc to " + params)
       res.status(200).json({ message: 'File uploaded successfully' });
     } catch (error) {
       console.error('S3 upload error:', error);
