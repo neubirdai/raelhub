@@ -1,7 +1,8 @@
 {
   "index": "Introduction",
   "create_rael": "Create a RAEL Chain",
-  "create_prompts": "Create a Prompt Template",
+  "create_prompts": "Create RAEL Prompts",
+  "list": "List RAEL Chains and Prompts",
   "about": {
     "title": "About",
     "type": "page"

@@ -14,6 +14,7 @@
   "homepage": "https://github.com/neubirdai",
   "dependencies": {
     "ace-builds": "^1.32.9",
+    "aws-sdk": "^2.1598.0",
     "next": "^13.0.6",
     "nextra": "latest",
     "nextra-theme-docs": "latest",

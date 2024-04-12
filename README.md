@@ -15,6 +15,7 @@ First, run `pnpm i` to install the dependencies.
 
 Follow up with:
 ```
+pnpm add aws-sdk
 pnpm add react-ace ace-builds
 ```
 
