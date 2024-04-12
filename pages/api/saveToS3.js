@@ -9,14 +9,31 @@ const s3 = new AWS.S3({
 export default async function handler(req, res) {
   if (req.method === 'POST') {
     const { data } = req.body;
+    const bucketName = process.env.AWS_S3_BUCKET_NAME;
     const params = {
-      Bucket: process.env.AWS_S3_BUCKET_NAME,
+      Bucket: bucketName,
       Key: `filename.py`,
       Body: data,
       ContentType: 'text/plain'
     };
 
     try {
+      // Check if the bucket exists and is accessible
+      await s3.headBucket({ Bucket: bucketName }).promise();
+    } catch (error) {
+      if (error.statusCode === 404) {
+        // If the bucket does not exist, create it
+        await s3.createBucket({ Bucket: bucketName }).promise();
+        console.log(`Bucket ${bucketName} created successfully`);
+      } else {
+        // Other errors
+        console.error('Error accessing bucket:', error);
+        return res.status(500).json({ error: 'Error accessing bucket', details: error });
+      }
+    }
+
+    try {
+      // Proceed to upload the file
       await s3.upload(params).promise();
       res.status(200).json({ message: 'File uploaded successfully' });
     } catch (error) {
@@ -28,4 +45,3 @@ export default async function handler(req, res) {
     res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
-
