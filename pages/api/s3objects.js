@@ -9,49 +9,48 @@ AWS.config.update({
 
 export default async function handler(req, res) {
   const s3 = new AWS.S3();
+  const bucketName = process.env.AWS_S3_BUCKET_NAME;
+  const region = process.env.AWS_REGION;
   const params = {
-    Bucket: process.env.AWS_S3_BUCKET_NAME
+    Bucket: bucketName
   };
 
   try {
-    // List all objects in the bucket
     const listData = await s3.listObjectsV2(params).promise();
 
-    // Fetch metadata and data for each object
     const objectsWithMetadataAndData = await Promise.all(
       listData.Contents.map(async (object) => {
         const metaParams = {
-          Bucket: params.Bucket,
+          Bucket: bucketName,
           Key: object.Key
         };
 
         try {
-          // Get object metadata
           const metadata = await s3.headObject(metaParams).promise();
-          // Get object data
           const data = await s3.getObject(metaParams).promise();
           const detailedObject = {
             Key: object.Key,
             LastModified: object.LastModified,
             Size: object.Size,
-            Metadata: metadata.Metadata, // This contains the metadata
-            Data: data.Body.toString('utf-8') // Assuming the object's data is text
+            Metadata: metadata.Metadata,
+            Data: data.Body.toString('utf-8'), // Assuming the object's data is text
+            URL: `https://${bucketName}.s3.${region}.amazonaws.com/${encodeURIComponent(object.Key)}`
           };
 
-          // Log each object's details to the console
           console.log(`Object Details: Key=${object.Key}, Size=${object.Size}, LastModified=${object.LastModified}`);
           console.log(`Metadata: ${JSON.stringify(metadata.Metadata, null, 2)}`);
-          console.log(`Data: ${detailedObject.Data.slice(0, 100)}...`); // Log first 100 characters
+          console.log(`Data: ${detailedObject.Data.slice(0, 100)}...`);
+          console.log(`URL: ${detailedObject.URL}`);
 
           return detailedObject;
         } catch (metaError) {
           console.error("Error fetching metadata or data for object:", object.Key, metaError);
-          return object; // Return basic info if fetch fails
+          return { ...object, Error: 'Failed to fetch metadata or data' }; // Include error info
         }
       })
     );
 
-    console.log("Completed fetching details for all objects in the bucket:", params.Bucket);
+    console.log("Completed fetching details for all objects in the bucket:", bucketName);
     res.status(200).json(objectsWithMetadataAndData);
   } catch (err) {
     console.error("Error fetching bucket contents:", err);

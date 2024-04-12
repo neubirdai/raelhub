@@ -57,21 +57,23 @@ const YamlEditor = ({ initialContent }) => {
         }}
         style={{ width: '100%', height: '500px' }}  // Set the dimensions as required
       />
-      <input
-        type="text"
-        value={keyName}
-        onChange={(e) => setKeyName(e.target.value)}
-        placeholder="Enter key name"
-        style={{ marginTop: '10px', marginRight: '10px' }}
-      />
-      <input
-          type="text"
-          value={comment}
-          onChange={(e) => setComment(e.target.value)}
-          placeholder="Enter comment"
-          style={{ marginTop: '10px', marginRight: '10px' }}
-      />
-      <button onClick={handleSave} style={{ marginTop: '10px' }}>Save to S3</button>
+      <div style={{ marginTop: '20px' }}>
+          <input
+              type="text"
+              value={keyName}
+              onChange={(e) => setKeyName(e.target.value)}
+              placeholder="Chain name"
+              style={{ marginTop: '10px', marginRight: '10px', padding: '5px 10px' }}
+          />
+          <input
+              type="text"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Comment"
+              style={{ marginTop: '10px', marginRight: '10px', padding: '5px 10px'  }}
+          />
+          <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
+      </div>
     </div>
   );
 };

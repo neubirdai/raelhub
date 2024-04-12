@@ -9,7 +9,7 @@ const ReadOnlyEditor = ({ initialContent }) => {
   return (
     <div>
       <AceEditor
-        mode="python"
+        mode="yaml"
         theme="monokai"
         name="readonly_editor"
         value={content}

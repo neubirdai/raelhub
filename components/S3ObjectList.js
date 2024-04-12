@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import ReadOnlyEditor from '../components/ReadOnlyEditor';  // Ensure this is the correct import path
-import Modal from './Modal'; // Adjust the path as necessary
+import ReadOnlyEditor from '../components/ReadOnlyEditor';  // Adjust the path as necessary
+import Modal from './Modal';  // Adjust the path as necessary
+import styles from './S3ObjectList.module.css'; // Adjust path as necessary
+
+
 
 const S3ObjectList = () => {
   const [objects, setObjects] = useState([]);
@@ -11,12 +14,7 @@ const S3ObjectList = () => {
     fetch('/api/s3objects')
       .then(res => res.json())
       .then(data => {
-        const enhancedData = data.map(obj => ({
-          ...obj,
-          templateType: obj.Metadata['templatetype'] || '-',
-          comment: obj.Metadata['comment'] || '-'
-        }));
-        setObjects(enhancedData);
+        setObjects(data);
         setLoading(false);
       })
       .catch(error => {
@@ -37,29 +35,29 @@ const S3ObjectList = () => {
 
   return (
     <div style={{ overflowY: 'auto', maxHeight: '400px', display: 'flex', flexDirection: 'column' }}>
-      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>Type</th>
-            <th>Comment</th>
-            <th>Last Modified</th>
+      <table className={styles.styledTable}>
+        <thead className={styles.thead}>
+          <tr className={styles.tbodyTr}>
+            <th className={styles.thTd}>Name</th>
+            <th className={styles.thTd}>Type</th>
+            <th className={styles.thTd}>Comment</th>
           </tr>
         </thead>
         <tbody>
           {objects.map((object, index) => (
-            <tr key={index} onClick={() => handleRowClick(object)}>
-              <td>{object.Key || '-'}</td>
-              <td>{object.templateType}</td>
-              <td>{object.comment}</td>
-              <td>{object.LastModified || '-'}</td>
+            <tr key={index} onClick={() => handleRowClick(object)} className={styles.tbodyTr}>
+              <td className={styles.thTd}>{object.Key || '-'}</td>
+              <td className={styles.thTd}>{object.Metadata['templatetype']}</td>
+              <td className={styles.thTd}>{object.Metadata['comment']}</td>
             </tr>
           ))}
         </tbody>
       </table>
-      <Modal isOpen={!!selectedObject} onClose={handleClose}>
-        <ReadOnlyEditor initialContent={`Key: ${selectedObject?.Key}\nType: ${selectedObject?.templateType}\nComment: ${selectedObject?.comment}\nLast Modified: ${selectedObject?.LastModified}\nData:\n${selectedObject?.Data}`} />
-      </Modal>
+      {selectedObject && (
+        <Modal isOpen={!!selectedObject} onClose={handleClose}>
+          <ReadOnlyEditor initialContent={`Key: ${selectedObject?.Key}\nURI: ${selectedObject?.URL}\nType: ${selectedObject?.Metadata['templatetype']}\nComment: ${selectedObject?.Metadata['comment']}\nModified: ${selectedObject?.LastModified}\n\n${selectedObject?.Data}`} />
+        </Modal>
+      )}
     </div>
   );
 };
