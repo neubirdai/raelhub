@@ -8,8 +8,17 @@ const S3ObjectList = () => {
     fetch('/api/s3objects')
       .then(res => res.json())
       .then(data => {
+        // Assuming 'data' includes objects with metadata attached
+        const enhancedData = data.map(obj => {
+          return {
+            ...obj,
+            templateType: obj.Metadata['templatetype'] || '-', // Extract templateType
+            comment: obj.Metadata['comment'] || '-'           // Extract comment
+          };
+        });
         // Extend the array to include 30 empty entries
-        setObjects([...data, ...Array(30).fill({})]); // Filling with empty objects
+        console.log("Enhanced data received from server:", enhancedData);
+        setObjects([...enhancedData, ...Array(30).fill({})]); // Filling with enhanced objects
         setLoading(false);
       })
       .catch(error => {
@@ -25,7 +34,7 @@ const S3ObjectList = () => {
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>RAEL</th>
+            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Name</th>
             <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Type</th>
             <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Comment</th>
             <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Last Modified</th>
@@ -35,8 +44,8 @@ const S3ObjectList = () => {
           {objects.map((object, index) => (
             <tr key={index}>
               <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.Key || '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.Size ? `${object.Size} bytes` : '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{'Comment'}</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.templateType}</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.comment}</td>
               <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.LastModified || '-'}</td>
             </tr>
           ))}
