@@ -1,24 +1,22 @@
 import React, { useEffect, useState } from 'react';
+import ReadOnlyEditor from '../components/ReadOnlyEditor';  // Ensure this is the correct import path
+import Modal from './Modal'; // Adjust the path as necessary
 
 const S3ObjectList = () => {
   const [objects, setObjects] = useState([]);
+  const [selectedObject, setSelectedObject] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetch('/api/s3objects')
       .then(res => res.json())
       .then(data => {
-        // Assuming 'data' includes objects with metadata attached
-        const enhancedData = data.map(obj => {
-          return {
-            ...obj,
-            templateType: obj.Metadata['templatetype'] || '-', // Extract templateType
-            comment: obj.Metadata['comment'] || '-'           // Extract comment
-          };
-        });
-        // Extend the array to include 30 empty entries
-        console.log("Enhanced data received from server:", enhancedData);
-        setObjects([...enhancedData, ...Array(30).fill({})]); // Filling with enhanced objects
+        const enhancedData = data.map(obj => ({
+          ...obj,
+          templateType: obj.Metadata['templatetype'] || '-',
+          comment: obj.Metadata['comment'] || '-'
+        }));
+        setObjects(enhancedData);
         setLoading(false);
       })
       .catch(error => {
@@ -27,30 +25,41 @@ const S3ObjectList = () => {
       });
   }, []);
 
+  const handleRowClick = (object) => {
+    setSelectedObject(object);
+  };
+
+  const handleClose = () => {
+    setSelectedObject(null);
+  };
+
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div style={{ overflowY: 'auto', maxHeight: '400px' }}>
+    <div style={{ overflowY: 'auto', maxHeight: '400px', display: 'flex', flexDirection: 'column' }}>
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Name</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Type</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Comment</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Last Modified</th>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Comment</th>
+            <th>Last Modified</th>
           </tr>
         </thead>
         <tbody>
           {objects.map((object, index) => (
-            <tr key={index}>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.Key || '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.templateType}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.comment}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.LastModified || '-'}</td>
+            <tr key={index} onClick={() => handleRowClick(object)}>
+              <td>{object.Key || '-'}</td>
+              <td>{object.templateType}</td>
+              <td>{object.comment}</td>
+              <td>{object.LastModified || '-'}</td>
             </tr>
           ))}
         </tbody>
       </table>
+      <Modal isOpen={!!selectedObject} onClose={handleClose}>
+        <ReadOnlyEditor initialContent={`Key: ${selectedObject?.Key}\nType: ${selectedObject?.templateType}\nComment: ${selectedObject?.comment}\nLast Modified: ${selectedObject?.LastModified}\nData:\n${selectedObject?.Data}`} />
+      </Modal>
     </div>
   );
 };
