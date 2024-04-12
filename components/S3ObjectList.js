@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from 'react';
-import styles from './S3ObjectList.module.css';
 
 const S3ObjectList = () => {
   const [objects, setObjects] = useState([]);
@@ -9,7 +8,8 @@ const S3ObjectList = () => {
     fetch('/api/s3objects')
       .then(res => res.json())
       .then(data => {
-        setObjects(data);
+        // Extend the array to include 30 empty entries
+        setObjects([...data, ...Array(30).fill({})]); // Filling with empty objects
         setLoading(false);
       })
       .catch(error => {
@@ -21,12 +21,25 @@ const S3ObjectList = () => {
   if (loading) return <p>Loading...</p>;
 
   return (
-    <div className="s3-object-list">
-      <ul>
-        {objects.map((object, index) => (
-          <li key={index}>{object.Key}</li>
-        ))}
-      </ul>
+    <div style={{ overflowY: 'auto', maxHeight: '400px' }}>
+      <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+        <thead>
+          <tr>
+            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Key</th>
+            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Last Modified</th>
+            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Size</th>
+          </tr>
+        </thead>
+        <tbody>
+          {objects.map((object, index) => (
+            <tr key={index}>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.Key || '-'}</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.LastModified || '-'}</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.Size ? `${object.Size} bytes` : '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 };
