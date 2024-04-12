@@ -12,7 +12,7 @@ export default async function handler(req, res) {
     const bucketName = process.env.AWS_S3_BUCKET_NAME;
     const params = {
       Bucket: bucketName,
-      Key: `filename.py`,
+      Key: `filename2.py`,
       Body: data,
       ContentType: 'text/plain'
     };

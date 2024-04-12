@@ -46,28 +46,5 @@ const PythonEditor = ({ initialContent }) => {
   );
 };
 
-const handleSave = () => {
-    fetch('/api/saveToS3', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ data: content }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.error) {
-            alert(`Failed to upload: ${data.error}`);
-        } else {
-            alert(`File uploaded successfully to bucket: ${process.env.AWS_S3_BUCKET_NAME}`);
-        }
-    })
-    .catch(error => {
-        console.error('Error saving file:', error);
-        alert('Failed to upload file. Check the console for more information.');
-    });
-};
-
-
 export default PythonEditor;
 
