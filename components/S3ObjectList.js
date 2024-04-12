@@ -8,6 +8,8 @@ const S3ObjectList = () => {
     fetch('/api/s3objects')
       .then(res => res.json())
       .then(data => {
+        console.log(`Setting ${JSON.stringify(data, null, 2)}`);
+        console.log("Setting " + data);
         setObjects(data);
         setLoading(false);
       })
@@ -18,8 +20,7 @@ const S3ObjectList = () => {
   }, []);
 
   if (loading) return <p>Loading...</p>;
-
-  if (loading) return <p>Loading...</p>;
+  console.log("Here 2" + objects);
   if (!objects || objects.length === 0) return <p>No objects found.</p>;
 
   return (
@@ -27,7 +28,7 @@ const S3ObjectList = () => {
         <ul>
             {Array.isArray(objects) ? objects.map((object, index) => (
                 <li key={index}>{object.Key}</li>
-            )) : <p>No objects or invalid data format.</p>}
+            )) : <p>No objects ahh or invalid data format.</p>}
         </ul>
     </div>
 );
