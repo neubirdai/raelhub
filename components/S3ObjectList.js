@@ -25,17 +25,19 @@ const S3ObjectList = () => {
       <table style={{ width: '100%', borderCollapse: 'collapse' }}>
         <thead>
           <tr>
-            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Key</th>
+            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>RAEL</th>
+            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Type</th>
+            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Comment</th>
             <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Last Modified</th>
-            <th style={{ border: '1px solid #ccc', padding: '8px', textAlign: 'left' }}>Size</th>
           </tr>
         </thead>
         <tbody>
           {objects.map((object, index) => (
             <tr key={index}>
               <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.Key || '-'}</td>
-              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.LastModified || '-'}</td>
               <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.Size ? `${object.Size} bytes` : '-'}</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{'Comment'}</td>
+              <td style={{ border: '1px solid #ccc', padding: '8px' }}>{object.LastModified || '-'}</td>
             </tr>
           ))}
         </tbody>

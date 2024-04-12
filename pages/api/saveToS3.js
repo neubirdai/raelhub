@@ -1,5 +1,6 @@
 import AWS from 'aws-sdk';
 
+// Configure AWS S3
 const s3 = new AWS.S3({
   accessKeyId: process.env.AWS_ACCESS_KEY_ID,
   secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
@@ -8,34 +9,35 @@ const s3 = new AWS.S3({
 
 export default async function handler(req, res) {
   if (req.method === 'POST') {
-    const { data } = req.body;
-    const bucketName = process.env.AWS_S3_BUCKET_NAME;
+    const { data, keyName, metadata, comment } = req.body;
+
+    // Validate keyName
+    if (!keyName) {
+      return res.status(400).json({ error: 'Key name is required' });
+    }
+
+    const fullMetadata = {
+      ...metadata, // Spread existing metadata
+      comment: comment // Add comment
+    };
+
+    // Prepare the S3 upload parameters
     const params = {
-      Bucket: bucketName,
-      Key: `filename2.py`,
+      Bucket: process.env.AWS_S3_BUCKET_NAME, // Use a fixed bucket name from environment variables
+      Key: keyName, // Use the dynamic key name from the request
       Body: data,
-      ContentType: 'text/plain'
+      ContentType: 'text/plain',
+      Metadata: fullMetadata
     };
 
     try {
-      await s3.headBucket({ Bucket: bucketName }).promise();
-    } catch (error) {
-      if (error.statusCode === 404) {
-        await s3.createBucket({ Bucket: bucketName }).promise();
-        console.log(`Bucket ${bucketName} created successfully`);
-      } else {
-        console.error('Error accessing bucket:', error);
-        return res.status(500).json({ error: 'Error accessing bucket', details: error });
-      }
-    }
-
-    try {
+      // Attempt to upload the file to the specified bucket with the dynamic key name and metadata
       await s3.upload(params).promise();
-      console.log("uploaded doc to " + params)
-      res.status(200).json({ message: 'File uploaded successfully' });
-    } catch (error) {
-      console.error('S3 upload error:', error);
-      res.status(500).json({ error: 'Failed to upload file', details: error });
+      console.log(`Uploaded document to ${params.Bucket}/${keyName} with metadata: ${JSON.stringify(fullMetadata)}.`);
+      res.status(200).json({ message: 'File uploaded successfully', metadata });
+    } catch (uploadError) {
+      console.error('S3 upload error:', uploadError);
+      res.status(500).json({ error: 'Failed to upload file', details: uploadError });
     }
   } else {
     res.setHeader('Allow', ['POST']);
