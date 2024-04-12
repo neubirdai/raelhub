@@ -31,6 +31,7 @@ const PythonEditor = ({ initialContent }) => {
         onChange={handleChange}
         name="python_editor"
         value={content}
+        fontSize={14}
         editorProps={{ $blockScrolling: true }}
         setOptions={{
           enableBasicAutocompletion: true,
