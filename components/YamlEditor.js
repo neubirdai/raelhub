@@ -39,6 +39,7 @@ const YamlEditor = ({ initialContent }) => {
 
 
   return (
+
     <div>
       <AceEditor
         mode="yaml"                    // Set the mode to YAML for syntax highlighting
@@ -63,16 +64,50 @@ const YamlEditor = ({ initialContent }) => {
               value={keyName}
               onChange={(e) => setKeyName(e.target.value)}
               placeholder="Chain name"
-              style={{ marginTop: '10px', marginRight: '10px', padding: '5px 10px' }}
+              style={{
+                  marginRight: '10px',
+                  padding: '10px 15px',
+                  border: 'none',
+                  borderRadius: '5px',
+                  backgroundColor: '#f0f0f0', // Light gray for input background to differentiate from button
+                  color: 'black',
+                  width: 'auto', // Adjust width as needed
+                  flexGrow: 1  // Allows input to fill available space
+              }}
+
           />
           <input
               type="text"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Comment"
-              style={{ marginTop: '10px', marginRight: '10px', padding: '5px 10px'  }}
+              style={{
+                  marginRight: '10px',
+                  padding: '10px 15px',
+                  border: 'none',
+                  borderRadius: '5px',
+                  backgroundColor: '#f0f0f0', // Light gray for input background to differentiate from button
+                  color: 'black',
+                  width: 'auto', // Adjust width as needed
+                  flexGrow: 1  // Allows input to fill available space
+              }}
+
           />
-          <button onClick={handleSave} style={{ marginTop: '10px' }}>Save</button>
+          <button
+            onClick={handleSave}
+            style={{
+                marginTop: '10px',
+                backgroundColor: '#008080', // Teal color
+                color: 'white', // White text color
+                border: 'none', // Remove default border
+                borderRadius: '5px', // Soft edges with a slight roundness
+                padding: '10px 15px', // Comfortable padding
+                cursor: 'pointer' // Pointer cursor on hover
+            }}
+          >
+            Save
+          </button>
+
       </div>
     </div>
   );
