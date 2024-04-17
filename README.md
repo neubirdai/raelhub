@@ -19,7 +19,11 @@ pnpm add aws-sdk
 pnpm add react-ace ace-builds
 ```
 
-Then, run `pnpm dev` to start the development server and visit localhost:3000.
+Then to start the development server and visit localhost:3000 run the command below:
+
+```
+pnpm dev
+``` 
 
 ## License
 
